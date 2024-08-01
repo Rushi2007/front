@@ -1,0 +1,23 @@
+/* Default styling */
+.doctor-image {
+    max-width: 30%;
+  }
+
+  .editicon {
+    color: rgb(20, 134, 241);
+    margin-right: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .deleteicon {
+    color: red;
+    font-size: 1.1rem;
+  }
+  
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+    .doctor-image {
+      max-width: 100%;
+    }
+  }
+  

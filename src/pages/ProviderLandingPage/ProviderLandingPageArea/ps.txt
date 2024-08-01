@@ -1,0 +1,372 @@
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import ChangePasswordArea from "../../ChangePassword/ChangePasswordArea/ChangePasswordArea";
+import ProviderProfile from "../../ProviderProfile/ProviderProfileArea/ProviderProfileArea";
+import AddNewProcedureArea from "../../AddNewProcedure/AddNewProcedureArea/AddNewProcedureArea";
+import UpdateProcedureArea from "../../UpdateProcedure/UpdateProcedureArea/UpdateProcedureArea";
+import DoctorProfileArea from "../../DoctorProfile/DoctorProfileArea/DoctorProfileArea";
+// import AddNewDoctorArea from '../../DoctorProfile/DoctorProfileArea/AddNewDoctorArea';
+
+const ProviderLandingPageArea = () => {
+  // const [Procedure_Name, setProcedure_Name] = useState("");
+  const [showAddNewProcedureArea, setShowAddNewProcedureArea] = useState(false);
+  const [showUpdateProcedureArea, setShowUpdateProcedureArea] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [showChangePassword, setshowChangePassword] = useState(false);
+  const [showProfile, setshowProfile] = useState(false);
+  const [showProcedure, setshowProcedure] = useState(true);
+  const [showDoctor, setshowDoctor] = useState(false);
+  const [selectedProcedure, setSelectedProcedure] = useState(null);
+  const [procedures, setProcedures] = useState([]);
+  const [showAddNewArea, setshowAddNewArea] = useState(false);
+  const [uname, setUsername] = useState("");
+  const [pId, setPId] = useState("");
+  const navigate = useNavigate();
+
+  const [procedureOne, setprocedureOne] = useState([]);
+  const [selectedProcedurelist, setselectedProcedurelist] = useState("");
+
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("name");
+    if (storedUsername) {
+      setUsername(storedUsername);
+      console.log("provider name", storedUsername);
+    }
+    const storedPId = localStorage.getItem("provider_id");
+    if (storedPId) {
+      setPId(storedPId);
+      console.log("provider id", storedPId);
+    }
+
+    const fetchData = async () => {
+      try {
+        // console.log(providers_id);
+        await fetch(
+          `http://localhost:8081/provider/procedure/search/${storedPId}`
+        )
+          .then((response) => response.json())
+          .then((result) => {
+
+            setProcedures(result.procedures);
+            console.log("new1==>", setProcedures(result.procedures));
+            // console.log("Procedure:",procedures);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchprocedure = async () => {
+      try {
+        // console.log(providers_id);
+        if (selectedProcedurelist) {
+          await fetch(
+            `http://localhost:8081/provider/procedures/search/${selectedProcedurelist}`
+          )
+            .then((res) => res.json())
+            .then((data) => setprocedureOne(data.procedure))
+            .catch((err) => console.log(err));
+        } else {
+          setprocedureOne([]);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchprocedure();
+    // Adding a timeout of 2 seconds before executing the fetchProcedure function
+    const timeoutId = setTimeout(() => {
+      fetchprocedure();
+    }, 2000);
+
+    // Clean up the effect and clear the timeout
+    return () => clearTimeout(timeoutId);
+  }, [selectedProcedurelist]);
+
+  const handlesetselectedProcedurelistChange = (e) => {
+    const selectedValue = e.target.value;
+    console.log("Selected Procedure:", selectedValue);
+    setselectedProcedurelist(selectedValue);
+    setShowResult(true);
+  };
+
+  const handleDelete = async (index) => {
+    await fetch(`http://localhost:8081/procedures/delete/${index}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Procedure Deleted");
+          // resetForm();
+          // navigate("/ProviderLandingPage");
+        } else {
+          alert("Procedure Delete Failed");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("An error occurred while Deleteing the procedure");
+      });
+  };
+
+  const handleShowUpdateProcedureArea = (procedure) => {
+    setshowDoctor(false);
+    setSelectedProcedure(procedure);
+    setShowAddNewProcedureArea(false);
+    setShowUpdateProcedureArea(true);
+    setshowChangePassword(false);
+    setshowProfile(false);
+    setshowProcedure(false);
+  };
+  const handleshowAddNewProcedureArea = () => {
+    setshowDoctor(false);
+    setShowAddNewProcedureArea(true);
+    setShowUpdateProcedureArea(false);
+    setshowChangePassword(false);
+    setshowProfile(false);
+    setshowProcedure(false);
+  };
+  const handleChanegePassword = () => {
+    setshowDoctor(false);
+    setshowChangePassword(true);
+    setShowAddNewProcedureArea(false);
+    setShowUpdateProcedureArea(false);
+    setshowProfile(false);
+    setshowProcedure(false);
+  };
+  const handleProfile = () => {
+    setshowDoctor(false);
+    setshowProfile(true);
+    setshowChangePassword(false);
+    setShowUpdateProcedureArea(false);
+    setshowProcedure(false);
+    setShowAddNewProcedureArea(false);
+  };
+  const handleProcedure = () => {
+    setshowDoctor(false);
+    setshowProcedure(true);
+    setshowProfile(false);
+    setshowChangePassword(false);
+    setShowUpdateProcedureArea(false);
+    setShowAddNewProcedureArea(false);
+  };
+  const handleshowDoctorArea = () => {
+    setshowDoctor(true);
+    setShowAddNewProcedureArea(false);
+    setShowUpdateProcedureArea(false);
+    setshowChangePassword(false);
+    setshowProfile(false);
+    setshowProcedure(false);
+  };
+
+  const onLogout = () => {
+
+    localStorage.removeItem("provider_id");
+    localStorage.removeItem("name");
+    navigate("/");
+  };
+
+  return (
+    <>
+      <div className="service-details-area pt-20 pb-60">
+        <div className="container">
+          <div className="row">
+          <div
+              class="col-auto col-md-3 col-xl-3 px-sm-2 px-0 text-white"
+              style={{ backgroundColor: "#8fb569" }}
+            >
+              <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                <a
+                  href="/"
+                  class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none"
+                >
+                  <i class="fs-4 bi-house text-white text-center"></i>
+                  &nbsp;&nbsp;&nbsp;
+                  <span class="fs-5 d-none d-sm-inline">
+                    Welcome Our Website
+                  </span>
+                </a>
+                <ul
+                  class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
+                  id="menu"
+                >
+                  <li class="nav-item" onClick={handleProfile}>
+                    <a href="#" class="nav-link align-middle px-0 text-white">
+                      <b>
+                        <span class="ms-1 d-none d-sm-inline text-white">
+                          <b>Privider Name : &nbsp;{uname} </b>
+                        </span>
+                      </b>
+                    </a>
+                  </li>
+                  <li class="nav-item" onClick={handleProfile}>
+                    <a href="#" class="nav-link align-middle px-0 text-white">
+                      <i class="fs-4 bi-person" style={{ size: "200" }}></i>
+                      &nbsp;{" "}
+                      <b>
+                        <span class="ms-1 d-none d-sm-inline text-white">
+                          Profile
+                        </span>
+                      </b>
+                    </a>
+                  </li>
+                  <li onClick={handleChanegePassword}>
+                    <a href="#" class="nav-link px-0 align-middle text-white">
+                      <i class="fs-4 bi-key-fill"></i>{" "}
+                      <b>
+                        <span class="ms-1 d-none d-sm-inline text-white">
+                          Change Password
+                        </span>
+                      </b>
+                    </a>
+                  </li>
+                  <li onClick={handleProcedure}>
+                    <a
+                      href="#submenu3"
+                      data-bs-toggle="collapse"
+                      class="nav-link px-0 align-middle text-white"
+                    >
+                      <i class="fs-4 bi-grid"></i>
+                      <b>
+                        {" "}
+                        <span class="ms-1 d-none d-sm-inline text-white">
+                          Procedure Details
+                        </span>{" "}
+                      </b>
+                    </a>
+                  </li>
+                  <li onClick={handleshowDoctorArea}>
+                    <a
+                      href="#submenu3"
+                      data-bs-toggle="collapse"
+                      class="nav-link px-0 align-middle text-white"
+                    >
+                      <i class="fs-4 bi-grid"></i>
+                      <b>
+                        {" "}
+                        <span class="ms-1 d-none d-sm-inline text-white">
+                          Doctors details
+                        </span>{" "}
+                      </b>
+                    </a>
+                  </li>
+                  <li onClick={handleProcedure}>
+                    <a
+                      href="#submenu3"
+                      data-bs-toggle="collapse"
+                      class="nav-link px-0 align-middle text-white"
+                    >
+                      <i class="fs-4 bi-grid"></i>
+                      <b>
+                        {" "}
+                        <span class="ms-1 d-none d-sm-inline text-white">
+                          Add Hospital Images
+                        </span>{" "}
+                      </b>
+                    </a>
+                  </li>
+                  <li onClick={handleProcedure}>
+                    <a
+                      href="#submenu3"
+                      data-bs-toggle="collapse"
+                      class="nav-link px-0 align-middle text-white"
+                    >
+                      <i class="fs-4 bi-grid"></i>
+                      <b>
+                        {" "}
+                        <span class="ms-1 d-none d-sm-inline text-white">
+                          Show Image Gallary
+                        </span>{" "}
+                      </b>
+                    </a>
+                  </li>
+                  {/* <li onClick={onLogout}>
+                    <a href="#" class="nav-link px-0 align-middle text-white">
+                      <i class="fs-4 bi-box-arrow-right"></i>{" "}
+                      <span class="ms-1 d-none d-sm-inline text-white">
+                        Logout
+                      </span>{" "}
+                    </a>
+                  </li> */}
+                </ul>
+              </div>
+            </div>
+            <div className="col-xl-8 col-lg-8">
+              <article className="service-details-box">
+                <div className="service-details-thumb mb-80">
+                  {showAddNewProcedureArea && <AddNewProcedureArea />}
+                  {showChangePassword && <ChangePasswordArea />}
+                  {showProfile && <ProviderProfile />}
+                  {showUpdateProcedureArea && (
+                    <UpdateProcedureArea procedure={selectedProcedure} />
+                  )}
+                  {/* <img className="img" src="img/services/service-details-thumb1.jpg" alt="" /> */}
+                  {showDoctor && <DoctorProfileArea />}
+                  {/* {showAddNewArea && showAddNew} */}
+                  {showProcedure && (
+                    <section className="login-area pt-100 pb-100">
+              
+                      <div className="container">
+                        <div className="row">
+                          <div className="col-lg-8 offset-lg-2">
+                            <div className="basic-login">
+                              <h3 className="text-center mb-60">Login From Here</h3>
+                              <form >
+                                <label htmlFor="name" className='mb-2'>Email Address <span>**</span></label>
+                                <input required id="name" type="text"
+                                  placeholder="Enter Username or Email address..." />
+
+                                <label htmlFor="pass" className='mb-2'>Password <span>**</span></label>
+                                <input required id="pass" type="password" placeholder="Enter password..." />
+
+                                <div className="login-action mb-20 fix">
+                                  <span className="log-rem f-left">
+                                    <input id="remember" type="checkbox" />
+                                    <label htmlFor="remember">Remember me!</label>
+                                  </span>
+                                  <span className="forgot-login f-right">
+                                    <span>Lost your password?</span>
+                                  </span>
+
+                                </div>
+                                <button type="submit" className="primary_btn btn-icon-green w-100">Login Now</button>
+                                <div className="or-divide"><span>or</span></div>
+                                <Link to="/register"><button className="primary_btn theme-btn w-100">Register Now</button></Link>
+                              </form>
+                              <div className="or-divide or-login"><span>or login with </span></div>
+                              <button className="login_btn">
+                                <img src="img/icon/google_icon.svg" alt="" /> </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                  )}
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default ProviderLandingPageArea;
+
+
